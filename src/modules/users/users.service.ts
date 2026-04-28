@@ -70,3 +70,26 @@ export async function updateUserProfile(
   }
 }
 
+export async function searchUsers(searchText: string, limit = 10) {
+  const normalizedSearchText = searchText.trim();
+  if (!normalizedSearchText) return [];
+  const maxResults = Math.max(1, Math.min(20, limit));
+
+  return await prisma.user.findMany({
+    where: {
+      OR: [
+        { name: { contains: normalizedSearchText, mode: "insensitive" } },
+        { email: { contains: normalizedSearchText, mode: "insensitive" } }
+      ]
+    },
+    orderBy: { updatedAt: "desc" },
+    take: maxResults,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true
+    }
+  });
+}
+

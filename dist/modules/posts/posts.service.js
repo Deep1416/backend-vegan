@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { getIo } from "../../realtime/socketio.js";
 export async function getFeed() {
     return await prisma.post.findMany({
         include: {
@@ -14,19 +15,56 @@ export async function createPost(userId, input) {
         data: {
             userId,
             content: input.content,
-            recipeLink: input.recipeLink ?? null
+            recipeLink: input.recipeLink ?? null,
+            // Prisma client type may be resolved from a different workspace; keep runtime correct.
+            type: input.type,
+            imageUrl: (input.imageUrl ?? null)
         }
     });
+    try {
+        getIo().to("feed").emit("feed:update", { kind: "post:created" });
+    }
+    catch {
+        // io may be unavailable in some runtimes
+    }
 }
 export async function addComment(userId, input) {
     await prisma.comment.create({ data: { userId, postId: input.postId, content: input.content } });
+    try {
+        getIo().to(`post:${input.postId}`).to("feed").emit("post:update", { postId: input.postId, kind: "comment:created" });
+    }
+    catch { }
 }
 export async function toggleLike(userId, postId) {
     const existing = await prisma.postLike.findUnique({ where: { userId_postId: { userId, postId } } });
     if (existing) {
         await prisma.postLike.delete({ where: { userId_postId: { userId, postId } } });
+        try {
+            getIo().to(`post:${postId}`).to("feed").emit("post:update", { postId, kind: "like:changed" });
+        }
+        catch { }
         return { liked: false };
     }
     await prisma.postLike.create({ data: { userId, postId } });
+    try {
+        getIo().to(`post:${postId}`).to("feed").emit("post:update", { postId, kind: "like:changed" });
+    }
+    catch { }
     return { liked: true };
+}
+export async function acceptAnswer(userId, input) {
+    const post = await prisma.post.findUnique({ where: { id: input.postId }, select: { id: true, userId: true } });
+    if (!post || post.userId !== userId) {
+        throw new Error("Not allowed");
+    }
+    const comment = await prisma.comment.findUnique({ where: { id: input.commentId }, select: { id: true, postId: true } });
+    if (!comment || comment.postId !== input.postId) {
+        throw new Error("Invalid comment");
+    }
+    const updated = await prisma.post.update({ where: { id: input.postId }, data: { acceptedCommentId: input.commentId } });
+    try {
+        getIo().to(`post:${input.postId}`).to("feed").emit("post:update", { postId: input.postId, kind: "answer:accepted" });
+    }
+    catch { }
+    return updated;
 }

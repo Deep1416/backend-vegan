@@ -12,6 +12,8 @@ import { usersRouter } from "../routes/users.js";
 import { catalogRouter } from "../routes/catalog.js";
 import { journeyStepRouter } from "../routes/journey-step.js";
 import { postsRouter } from "../modules/posts/posts.router.js";
+import { uploadsRouter } from "../routes/uploads.js";
+import { dmRouter } from "../modules/dm/dm.router.js";
 
 export const apiRouter = Router();
 
@@ -26,6 +28,8 @@ apiRouter.use(onboardingRouter);
 apiRouter.use(cheatMealsRouter);
 apiRouter.use(vegabotRouter);
 apiRouter.use(usersRouter);
+apiRouter.use(uploadsRouter);
+apiRouter.use(dmRouter);
 apiRouter.use(catalogRouter);
 apiRouter.use(journeyStepRouter);
 

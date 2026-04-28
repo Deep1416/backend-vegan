@@ -1,0 +1,23 @@
+import { Router } from "express";
+import { asyncHandler } from "../../common/http/async-handler.js";
+import { requireUser } from "../../common/auth/require-user.js";
+import {
+  deleteConversationById,
+  deleteMessageById,
+  getInbox,
+  getMessages,
+  postConversation,
+  postMarkRead,
+  postMessage
+} from "./dm.controller.js";
+
+export const dmRouter = Router();
+
+dmRouter.get("/conversations", requireUser, asyncHandler(getInbox));
+dmRouter.post("/conversations", requireUser, asyncHandler(postConversation));
+dmRouter.get("/conversations/:id/messages", requireUser, asyncHandler(getMessages));
+dmRouter.post("/conversations/:id/messages", requireUser, asyncHandler(postMessage));
+dmRouter.post("/conversations/:id/read", requireUser, asyncHandler(postMarkRead));
+dmRouter.delete("/conversations/:id", requireUser, asyncHandler(deleteConversationById));
+dmRouter.delete("/messages/:id", requireUser, asyncHandler(deleteMessageById));
+

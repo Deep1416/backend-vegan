@@ -1,6 +1,6 @@
 import { jsonOk } from "../../common/http/json.js";
 import { optionalString, requireEmail, requireObject } from "../../common/validation/validators.js";
-import { getUserById, updateUserProfile } from "./users.service.js";
+import { getUserById, searchUsers, updateUserProfile } from "./users.service.js";
 export async function getUser(req, res) {
     const user = await getUserById(req.params.id);
     return jsonOk(res, user);
@@ -18,4 +18,12 @@ export async function patchMe(req, res) {
         image: image == null ? undefined : image
     });
     return jsonOk(res, updated);
+}
+export async function getUsersSearch(req, res) {
+    const searchText = typeof req.query?.q === "string" ? String(req.query.q) : "";
+    const requestedLimitRaw = req.query?.limit;
+    const requestedLimit = typeof requestedLimitRaw === "string" ? Number(requestedLimitRaw) : typeof requestedLimitRaw === "number" ? requestedLimitRaw : 10;
+    const safeLimit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(20, Math.floor(requestedLimit))) : 10;
+    const results = await searchUsers(searchText, safeLimit);
+    return jsonOk(res, results);
 }

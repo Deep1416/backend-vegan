@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { jsonError } from "../../common/http/json.js";
 import { asyncHandler } from "../../common/http/async-handler.js";
-import { getPostsFeed, postComment, postCreate, postLike, requireUserMiddleware } from "./posts.controller.js";
+import { getPostsFeed, postAcceptAnswer, postComment, postCreate, postLike, requireUserMiddleware } from "./posts.controller.js";
 export const postsRouter = Router();
 // Public feed: no auth required
 postsRouter.get("/posts/feed", async (req, res) => {
@@ -15,3 +15,4 @@ postsRouter.get("/posts/feed", async (req, res) => {
 postsRouter.post("/posts", requireUserMiddleware, asyncHandler(postCreate));
 postsRouter.post("/posts/comment", requireUserMiddleware, asyncHandler(postComment));
 postsRouter.post("/posts/like", requireUserMiddleware, asyncHandler(postLike));
+postsRouter.post("/posts/accept-answer", requireUserMiddleware, asyncHandler(postAcceptAnswer));

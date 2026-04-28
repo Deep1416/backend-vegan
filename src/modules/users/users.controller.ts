@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import type { AuthedRequest } from "../../common/auth/require-user.js";
 import { jsonOk } from "../../common/http/json.js";
-import { optionalString, requireEmail, requireObject } from "../../common/validation/validators.js";
-import { getUserById, updateUserProfile } from "./users.service.js";
+import { optionalString, requireEmail, requireObject, requireString } from "../../common/validation/validators.js";
+import { getUserById, searchUsers, updateUserProfile } from "./users.service.js";
 
 export async function getUser(req: AuthedRequest, res: Response) {
   const user = await getUserById(req.params.id);
@@ -25,5 +25,16 @@ export async function patchMe(req: AuthedRequest, res: Response) {
   });
 
   return jsonOk(res, updated);
+}
+
+export async function getUsersSearch(req: AuthedRequest, res: Response) {
+  const searchText = typeof (req.query as any)?.q === "string" ? String((req.query as any).q) : "";
+  const requestedLimitRaw = (req.query as any)?.limit;
+  const requestedLimit =
+    typeof requestedLimitRaw === "string" ? Number(requestedLimitRaw) : typeof requestedLimitRaw === "number" ? requestedLimitRaw : 10;
+  const safeLimit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(20, Math.floor(requestedLimit))) : 10;
+
+  const results = await searchUsers(searchText, safeLimit);
+  return jsonOk(res, results);
 }
 

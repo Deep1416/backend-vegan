@@ -1,7 +1,7 @@
 import { jsonOk } from "../../common/http/json.js";
 import { requireUser } from "../../common/auth/require-user.js";
-import { optionalString, requireObject, requireString } from "../../common/validation/validators.js";
-import { addComment, createPost, getFeed, toggleLike } from "./posts.service.js";
+import { optionalString, requireEnum, requireObject, requireString } from "../../common/validation/validators.js";
+import { addComment, createPost, getFeed, toggleLike, acceptAnswer } from "./posts.service.js";
 export async function getPostsFeed(_req, res) {
     const posts = await getFeed();
     return jsonOk(res, posts);
@@ -11,7 +11,9 @@ export async function postCreate(req, res) {
     const body = requireObject(req.body);
     const content = requireString(body, "content", { trim: true, min: 1, max: 2200 });
     const recipeLink = optionalString(body, "recipeLink", { trim: true, max: 500 }) ?? null;
-    await createPost(req.userId, { content, recipeLink });
+    const type = requireEnum(body, "type", ["QUESTION", "WIN", "MEAL_IDEA", "NEED_SUPPORT"]);
+    const imageUrl = optionalString(body, "imageUrl", { trim: true, max: 2000 }) ?? null;
+    await createPost(req.userId, { content, recipeLink, type, imageUrl });
     return jsonOk(res, { success: true }, 201);
 }
 export async function postComment(req, res) {
@@ -26,4 +28,11 @@ export async function postLike(req, res) {
     const postId = requireString(body, "postId", { trim: true, min: 8 });
     const result = await toggleLike(req.userId, postId);
     return jsonOk(res, result);
+}
+export async function postAcceptAnswer(req, res) {
+    const body = requireObject(req.body);
+    const postId = requireString(body, "postId", { trim: true, min: 8 });
+    const commentId = requireString(body, "commentId", { trim: true, min: 8 });
+    const updated = await acceptAnswer(req.userId, { postId, commentId });
+    return jsonOk(res, updated);
 }
