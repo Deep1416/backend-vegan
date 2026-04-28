@@ -10,6 +10,7 @@ import { cheatMealsRouter } from "../routes/cheat-meals.js";
 import { vegabotRouter } from "../routes/vegabot.js";
 import { usersRouter } from "../routes/users.js";
 import { catalogRouter } from "../routes/catalog.js";
+import { journeyStepRouter } from "../routes/journey-step.js";
 import { postsRouter } from "../modules/posts/posts.router.js";
 
 export const apiRouter = Router();
@@ -26,4 +27,5 @@ apiRouter.use(cheatMealsRouter);
 apiRouter.use(vegabotRouter);
 apiRouter.use(usersRouter);
 apiRouter.use(catalogRouter);
+apiRouter.use(journeyStepRouter);
 
