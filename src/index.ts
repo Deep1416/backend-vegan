@@ -10,7 +10,6 @@ const server = http.createServer(app);
 initSocketIo(server);
 
 server.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Backend listening on :${port}`);
+	// eslint-disable-next-line no-console
+	console.log(`Backend listening on :${port}`);
 });
-

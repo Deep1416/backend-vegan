@@ -20,19 +20,37 @@ export async function getUserById(id) {
             calorieTargetOverride: true,
             proteinTargetOverride: true,
             hydrationTargetOverride: true,
+            role: true,
+            gymTrainerId: true,
+            approvedGymPlanJson: true,
             createdAt: true,
-            updatedAt: true
+            updatedAt: true,
+            gymTrainer: {
+                select: {
+                    id: true,
+                    name: true,
+                    title: true,
+                    bio: true,
+                    imageUrl: true
+                }
+            }
         }
     });
 }
 export async function updateUserProfile(userId, input) {
+    if (input.gymTrainerId !== undefined && input.gymTrainerId !== null) {
+        const t = await prisma.gymTrainer.findUnique({ where: { id: input.gymTrainerId } });
+        if (!t)
+            throw new HttpError(400, "Invalid gym trainer");
+    }
     try {
         return await prisma.user.update({
             where: { id: userId },
             data: {
                 name: input.name ?? undefined,
                 email: input.email ?? undefined,
-                image: input.image ?? undefined
+                image: input.image ?? undefined,
+                gymTrainerId: input.gymTrainerId === undefined ? undefined : input.gymTrainerId
             },
             select: {
                 id: true,
@@ -51,8 +69,20 @@ export async function updateUserProfile(userId, input) {
                 calorieTargetOverride: true,
                 proteinTargetOverride: true,
                 hydrationTargetOverride: true,
+                role: true,
+                gymTrainerId: true,
+                approvedGymPlanJson: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                gymTrainer: {
+                    select: {
+                        id: true,
+                        name: true,
+                        title: true,
+                        bio: true,
+                        imageUrl: true
+                    }
+                }
             }
         });
     }
