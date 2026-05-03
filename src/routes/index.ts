@@ -14,6 +14,8 @@ import { journeyStepRouter } from "../routes/journey-step.js";
 import { postsRouter } from "../modules/posts/posts.router.js";
 import { uploadsRouter } from "../routes/uploads.js";
 import { dmRouter } from "../modules/dm/dm.router.js";
+import { gymRouter } from "../routes/gym.js";
+import { adminRouter } from "../routes/admin.js";
 
 export const apiRouter = Router();
 
@@ -32,4 +34,6 @@ apiRouter.use(uploadsRouter);
 apiRouter.use(dmRouter);
 apiRouter.use(catalogRouter);
 apiRouter.use(journeyStepRouter);
+apiRouter.use(gymRouter);
+apiRouter.use(adminRouter);
 

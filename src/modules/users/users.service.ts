@@ -21,8 +21,20 @@ export async function getUserById(id: string) {
       calorieTargetOverride: true,
       proteinTargetOverride: true,
       hydrationTargetOverride: true,
+      role: true,
+      gymTrainerId: true,
+      approvedGymPlanJson: true,
       createdAt: true,
-      updatedAt: true
+      updatedAt: true,
+      gymTrainer: {
+        select: {
+          id: true,
+          name: true,
+          title: true,
+          bio: true,
+          imageUrl: true
+        }
+      }
     }
   });
 }
@@ -33,15 +45,50 @@ export async function updateUserProfile(
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    gymTrainerId?: string | null;
+    heightCm?: number | null;
+    weightKg?: number | null;
+    age?: number | null;
+    gender?: "FEMALE" | "MALE" | "OTHER";
+    activityLevel?: "SEDENTARY" | "LIGHT" | "MODERATE" | "ACTIVE" | "ATHLETE";
+    goal?: "FAT_LOSS" | "MUSCLE_BUILD" | "LIFESTYLE";
   }
 ) {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { goal: true, goalLocked: true }
+  });
+  if (!existing) throw new HttpError(404, "User not found");
+
+  if (input.goal !== undefined) {
+    if (existing.goalLocked && input.goal !== existing.goal) {
+      throw new HttpError(400, "Goal is permanent and cannot be changed");
+    }
+  }
+
+  if (input.gymTrainerId !== undefined && input.gymTrainerId !== null) {
+    const t = await prisma.gymTrainer.findUnique({ where: { id: input.gymTrainerId } });
+    if (!t) throw new HttpError(400, "Invalid gym trainer");
+  }
+
+  const lockGoal =
+    input.goal !== undefined && (input.goal === "FAT_LOSS" || input.goal === "MUSCLE_BUILD");
+
   try {
     return await prisma.user.update({
       where: { id: userId },
       data: {
         name: input.name ?? undefined,
         email: input.email ?? undefined,
-        image: input.image ?? undefined
+        image: input.image ?? undefined,
+        gymTrainerId: input.gymTrainerId === undefined ? undefined : input.gymTrainerId,
+        heightCm: input.heightCm === undefined ? undefined : input.heightCm,
+        weightKg: input.weightKg === undefined ? undefined : input.weightKg,
+        age: input.age === undefined ? undefined : input.age,
+        gender: input.gender === undefined ? undefined : input.gender,
+        activityLevel: input.activityLevel === undefined ? undefined : input.activityLevel,
+        goal: input.goal === undefined ? undefined : input.goal,
+        ...(input.goal !== undefined ? { goalLocked: existing.goalLocked || Boolean(lockGoal) } : {})
       },
       select: {
         id: true,
@@ -60,8 +107,20 @@ export async function updateUserProfile(
         calorieTargetOverride: true,
         proteinTargetOverride: true,
         hydrationTargetOverride: true,
+        role: true,
+        gymTrainerId: true,
+        approvedGymPlanJson: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        gymTrainer: {
+          select: {
+            id: true,
+            name: true,
+            title: true,
+            bio: true,
+            imageUrl: true
+          }
+        }
       }
     });
   } catch (err: any) {

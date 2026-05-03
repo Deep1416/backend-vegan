@@ -193,7 +193,8 @@ export async function credentialsAuthorize(input: { email: string; password: str
     image: user.image,
     goal: user.goal,
     onboardingDone: user.onboardingDone,
-    goalLocked: user.goalLocked
+    goalLocked: user.goalLocked,
+    role: user.role
   };
 }
 
@@ -218,7 +219,8 @@ export async function loginPassword(input: { email: string; password: string }) 
       image: user.image,
       goal: user.goal,
       onboardingDone: user.onboardingDone,
-      goalLocked: user.goalLocked
+      goalLocked: user.goalLocked,
+      role: user.role
     }
   };
 }
@@ -259,7 +261,8 @@ export async function loginGoogle(input: { idToken: string }) {
       image: user.image,
       goal: user.goal,
       onboardingDone: user.onboardingDone,
-      goalLocked: user.goalLocked
+      goalLocked: user.goalLocked,
+      role: user.role
     }
   };
 }
