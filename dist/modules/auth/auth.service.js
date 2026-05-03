@@ -166,7 +166,8 @@ export async function credentialsAuthorize(input) {
         image: user.image,
         goal: user.goal,
         onboardingDone: user.onboardingDone,
-        goalLocked: user.goalLocked
+        goalLocked: user.goalLocked,
+        role: user.role
     };
 }
 export async function loginPassword(input) {
@@ -189,7 +190,8 @@ export async function loginPassword(input) {
             image: user.image,
             goal: user.goal,
             onboardingDone: user.onboardingDone,
-            goalLocked: user.goalLocked
+            goalLocked: user.goalLocked,
+            role: user.role
         }
     };
 }
@@ -225,7 +227,8 @@ export async function loginGoogle(input) {
             image: user.image,
             goal: user.goal,
             onboardingDone: user.onboardingDone,
-            goalLocked: user.goalLocked
+            goalLocked: user.goalLocked,
+            role: user.role
         }
     };
 }

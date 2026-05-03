@@ -1,6 +1,10 @@
 import { jsonOk } from "../../common/http/json.js";
-import { optionalString, requireEmail, requireObject } from "../../common/validation/validators.js";
+import { optionalString, requireEmail, requireObject, requireString } from "../../common/validation/validators.js";
 import { getUserById, searchUsers, updateUserProfile } from "./users.service.js";
+export async function getMe(req, res) {
+    const user = await getUserById(req.userId);
+    return jsonOk(res, user);
+}
 export async function getUser(req, res) {
     const user = await getUserById(req.params.id);
     return jsonOk(res, user);
@@ -12,10 +16,18 @@ export async function patchMe(req, res) {
     let email;
     if (body.email != null)
         email = requireEmail(body, "email");
+    let gymTrainerId;
+    if (body.gymTrainerId === null) {
+        gymTrainerId = null;
+    }
+    else if (body.gymTrainerId !== undefined) {
+        gymTrainerId = requireString(body, "gymTrainerId", { trim: true, min: 10, max: 40 });
+    }
     const updated = await updateUserProfile(req.userId, {
         name: name == null ? undefined : name,
         email: email == null ? undefined : email,
-        image: image == null ? undefined : image
+        image: image == null ? undefined : image,
+        gymTrainerId
     });
     return jsonOk(res, updated);
 }

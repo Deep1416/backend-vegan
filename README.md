@@ -22,4 +22,3 @@ Example:
 ```bash
 curl -H "X-User-Id: <userId>" http://localhost:4000/api/profile/targets
 ```
-

@@ -7,13 +7,29 @@ export async function completeOnboarding(userId, input) {
     if (user.goalLocked && input.goal !== user.goal) {
         throw new HttpError(400, "Goal is permanent and cannot be changed");
     }
+    let trainerConnect;
+    if (input.gymTrainerId === null) {
+        trainerConnect = { disconnect: true };
+    }
+    else if (input.gymTrainerId) {
+        const t = await prisma.gymTrainer.findUnique({ where: { id: input.gymTrainerId } });
+        if (!t)
+            throw new HttpError(400, "Invalid gym trainer");
+        trainerConnect = { connect: { id: input.gymTrainerId } };
+    }
     const lockGoal = input.goal === "FAT_LOSS" || input.goal === "MUSCLE_BUILD";
     await prisma.user.update({
         where: { id: userId },
         data: {
-            ...input,
+            heightCm: input.heightCm,
+            weightKg: input.weightKg,
+            age: input.age,
+            gender: input.gender,
+            activityLevel: input.activityLevel,
+            goal: input.goal,
             goalLocked: user.goalLocked || lockGoal,
-            onboardingDone: true
+            onboardingDone: true,
+            ...(trainerConnect ? { gymTrainer: trainerConnect } : {})
         }
     });
     return { success: true };

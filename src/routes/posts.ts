@@ -11,7 +11,10 @@ postsRouter.get("/posts/feed", async (_req, res) => {
 		const posts = await prisma.post.findMany({
 			include: {
 				user: { select: { id: true, name: true, goal: true } },
-				comments: { include: { user: { select: { name: true } } } },
+				comments: {
+					orderBy: { createdAt: "asc" },
+					include: { user: { select: { name: true } } },
+				},
 				likes: true,
 			},
 			orderBy: { createdAt: "desc" },
